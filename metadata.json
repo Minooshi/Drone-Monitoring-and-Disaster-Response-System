@@ -1,0 +1,5 @@
+{
+  "name": "AEGIS Drone Command",
+  "description": "Tactical Medical Response and Drone Mission Control System",
+  "requestFramePermissions": ["camera", "microphone", "geolocation"]
+}
