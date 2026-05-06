@@ -2,9 +2,11 @@ import React, { useEffect, useRef } from 'react';
 import { Bell, SunMoon, User } from 'lucide-react';
 import { clsx } from 'clsx';
 import { useDrone } from '../../lib/DroneContext';
+import { useTheme } from '../../lib/ThemeContext';
 
 export function Topbar() {
   const { status } = useDrone();
+  const { theme, toggleTheme } = useTheme();
   const isInFlight = status === 'In Flight';
   const timeRef = useRef<HTMLSpanElement>(null);
 
@@ -28,7 +30,7 @@ export function Topbar() {
   }, []);
 
   return (
-    <header className="h-16 border-b border-outline-variant/10 bg-slate-950/80 backdrop-blur-md flex justify-between items-center px-8 z-40">
+    <header className="h-16 border-b border-outline-variant/10 bg-surface/80 backdrop-blur-md flex justify-between items-center px-8 z-40 transition-colors duration-300">
       <div className="flex items-center gap-6">
 
         <div className="flex items-center gap-2">
@@ -57,7 +59,11 @@ export function Topbar() {
           <button className="p-2 text-on-surface-variant hover:text-primary transition-colors">
             <Bell className="w-5 h-5" />
           </button>
-          <button className="p-2 text-on-surface-variant hover:text-primary transition-colors">
+          <button 
+            className="p-2 text-on-surface-variant hover:text-primary transition-colors"
+            onClick={toggleTheme}
+            title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
+          >
             <SunMoon className="w-5 h-5" />
           </button>
           <div className="flex items-center gap-3 pl-4 border-l border-outline-variant/20">

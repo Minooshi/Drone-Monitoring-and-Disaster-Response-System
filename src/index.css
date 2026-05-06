@@ -33,14 +33,37 @@
 }
 
 @layer base {
+  :root.light {
+    --color-background: #f1f3fc;
+    --color-surface: #ffffff;
+    --color-surface-container: #e8ebf5;
+    --color-surface-container-low: #f5f7fa;
+    --color-surface-container-high: #dee2f0;
+    --color-surface-container-highest: #d2d7eb;
+    --color-surface-bright: #ffffff;
+    
+    --color-on-surface: #0a0e14;
+    --color-on-surface-variant: #44484f;
+    --color-outline: #a8abb3;
+    --color-outline-variant: #c3c6cf;
+    
+    --color-primary: #0075b3;
+    --color-primary-container: #50b5ff;
+    --color-on-primary: #ffffff;
+    
+    --color-secondary: #008736;
+    --color-secondary-container: #6ffb85;
+    --color-on-secondary: #ffffff;
+  }
+
   body {
-    @apply bg-background text-on-surface font-sans antialiased;
+    @apply bg-background text-on-surface font-sans antialiased transition-colors duration-300;
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-slate-950/70 backdrop-blur-xl border border-outline-variant/10;
+    @apply bg-surface/70 backdrop-blur-xl border border-outline-variant/10 transition-colors duration-300;
   }
   
   .hud-corner {

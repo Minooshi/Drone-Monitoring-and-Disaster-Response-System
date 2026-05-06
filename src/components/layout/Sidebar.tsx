@@ -3,10 +3,6 @@ import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
   Bell, 
-  Rocket, 
-  UserSearch, 
-  Thermometer, 
-  Radar, 
   BarChart3, 
   Settings
 } from 'lucide-react';
@@ -15,17 +11,13 @@ import { cn } from '../../lib/utils';
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
   { icon: Bell, label: 'Alerts', path: '/alerts' },
-  { icon: Rocket, label: 'Drone Mission', path: '/mission' },
-  { icon: UserSearch, label: 'Victim Detection', path: '/detection' },
-  { icon: Thermometer, label: 'Thermal', path: '/thermal' },
-  { icon: Radar, label: 'GPR Scan', path: '/gpr' },
   { icon: BarChart3, label: 'Analytics', path: '/analytics' },
   { icon: Settings, label: 'Settings', path: '/settings' },
 ];
 
 export function Sidebar() {
   return (
-    <aside className="w-64 border-r border-outline-variant/10 bg-slate-950/70 backdrop-blur-xl flex flex-col h-full py-6 z-50">
+    <aside className="w-64 border-r border-outline-variant/10 bg-surface/70 backdrop-blur-xl flex flex-col h-full py-6 z-50 transition-colors duration-300">
       <div className="px-6 mb-10">
         <h1 className="text-lg font-bold tracking-widest text-primary uppercase font-headline leading-tight">
           Drone Monitoring

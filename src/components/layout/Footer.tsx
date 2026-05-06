@@ -3,7 +3,7 @@ import { MapPin, ArrowUp, Activity } from 'lucide-react';
 
 export function Footer() {
   return (
-    <footer className="h-10 border-t border-outline-variant/10 bg-slate-950/90 backdrop-blur-2xl flex justify-around items-center px-6 z-50">
+    <footer className="h-10 border-t border-outline-variant/10 bg-surface/90 backdrop-blur-2xl flex justify-around items-center px-6 z-50 transition-colors duration-300">
       <div className="flex items-center gap-2 text-secondary font-mono text-[10px] tracking-tighter">
         <MapPin className="w-3 h-3" />
         <span>42.3601° N, 71.0589° W</span>
