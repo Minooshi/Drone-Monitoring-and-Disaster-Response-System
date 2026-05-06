@@ -8,8 +8,7 @@ import {
   Thermometer, 
   Radar, 
   BarChart3, 
-  Settings,
-  ShieldAlert
+  Settings
 } from 'lucide-react';
 import { cn } from '../../lib/utils';
 
@@ -28,11 +27,11 @@ export function Sidebar() {
   return (
     <aside className="w-64 border-r border-outline-variant/10 bg-slate-950/70 backdrop-blur-xl flex flex-col h-full py-6 z-50">
       <div className="px-6 mb-10">
-        <h1 className="text-lg font-bold tracking-widest text-primary uppercase font-headline">
-          AEGIS COMMAND
+        <h1 className="text-lg font-bold tracking-widest text-primary uppercase font-headline leading-tight">
+          Drone Monitoring
         </h1>
-        <p className="font-headline tracking-tight text-[10px] uppercase text-on-surface-variant opacity-70">
-          Tactical Medical Response
+        <p className="font-headline tracking-widest text-[10px] uppercase text-on-surface-variant font-bold">
+          System
         </p>
       </div>
 
@@ -54,12 +53,7 @@ export function Sidebar() {
         ))}
       </nav>
 
-      <div className="px-4 mt-auto">
-        <button className="w-full py-3 bg-error-container text-on-surface font-headline text-xs font-bold uppercase tracking-widest rounded-xl hover:brightness-110 transition-all duration-300 active:scale-95 flex items-center justify-center gap-2 shadow-lg shadow-error/20">
-          <ShieldAlert className="w-4 h-4" />
-          Emergency Kill Switch
-        </button>
-      </div>
+
     </aside>
   );
 }

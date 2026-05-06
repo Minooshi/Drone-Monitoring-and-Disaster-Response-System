@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, ArrowUp, Activity, BatteryCharging } from 'lucide-react';
+import { MapPin, ArrowUp, Activity } from 'lucide-react';
 
 export function Footer() {
   return (
@@ -16,10 +16,7 @@ export function Footer() {
         <Activity className="w-3 h-3" />
         <span>SIG: 98%</span>
       </div>
-      <div className="flex items-center gap-2 text-secondary font-mono text-[10px] tracking-tighter">
-        <BatteryCharging className="w-3 h-3" />
-        <span>BAT: 84%</span>
-      </div>
+
     </footer>
   );
 }
