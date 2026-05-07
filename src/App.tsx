@@ -9,6 +9,8 @@ import { Login } from './pages/Login';
 import { DroneProvider } from './lib/DroneContext';
 import { ThemeProvider } from './lib/ThemeContext';
 
+import { Settings } from './pages/Settings';
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -20,7 +22,7 @@ export default function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/alerts" element={<Alerts />} />
             <Route path="/analytics" element={<Analytics />} />
-            <Route path="/settings" element={<div className="p-8 text-on-surface-variant">Settings Module Offline</div>} />
+            <Route path="/settings" element={<Settings />} />
           </Route>
         </Routes>
       </BrowserRouter>
