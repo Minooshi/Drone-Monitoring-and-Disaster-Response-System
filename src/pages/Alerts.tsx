@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card } from '../components/ui/Card';
 import { AlertTriangle, Bell, Clock, Filter, Search, ShieldAlert, Info, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
@@ -12,6 +12,15 @@ const ALERTS = [
 ];
 
 export function Alerts() {
+  const [searchQuery, setSearchQuery] = useState('');
+
+  const filteredAlerts = ALERTS.filter(alert => 
+    alert.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    alert.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    alert.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    alert.location.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -25,6 +34,8 @@ export function Alerts() {
             <input 
               type="text" 
               placeholder="Search alerts..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="bg-surface-container-low border border-outline-variant/20 rounded-xl py-2 pl-10 pr-4 text-xs focus:outline-none focus:border-primary/50 transition-all w-64"
             />
           </div>
@@ -74,7 +85,7 @@ export function Alerts() {
 
         {/* Alert List */}
         <div className="col-span-12 lg:col-span-9 space-y-4">
-          {ALERTS.map((alert, idx) => (
+          {filteredAlerts.map((alert, idx) => (
             <motion.div
               key={alert.id}
               initial={{ opacity: 0, x: 20 }}
