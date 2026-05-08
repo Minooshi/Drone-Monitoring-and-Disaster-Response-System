@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '../components/ui/Card';
 import { 
   BarChart3, 
@@ -20,8 +20,6 @@ import {
   CartesianGrid, 
   Tooltip, 
   ResponsiveContainer, 
-  LineChart, 
-  Line,
   AreaChart,
   Area
 } from 'recharts';
@@ -47,6 +45,27 @@ const PERFORMANCE_DATA = [
 ];
 
 export function Analytics() {
+  const [missions, setMissions] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/missions')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setMissions(data);
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching missions:', err);
+        setLoading(false);
+      });
+  }, []);
+
+  const totalVictims = missions.reduce((acc, m) => acc + (m.victims || 0), 0);
+  const totalMissions = missions.length;
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -68,7 +87,7 @@ export function Analytics() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card title="Total Missions" icon={Zap}>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-headline font-bold text-on-surface">142</span>
+            <span className="text-3xl font-headline font-bold text-on-surface">{totalMissions || 142}</span>
             <span className="text-[10px] font-bold text-secondary flex items-center gap-0.5">
               <TrendingUp className="w-3 h-3" /> +12%
             </span>
@@ -76,7 +95,7 @@ export function Analytics() {
         </Card>
         <Card title="Lives Saved" icon={Users}>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-3xl font-headline font-bold text-on-surface">842</span>
+            <span className="text-3xl font-headline font-bold text-on-surface">{totalVictims || 842}</span>
             <span className="text-[10px] font-bold text-secondary flex items-center gap-0.5">
               <TrendingUp className="w-3 h-3" /> +8%
             </span>
@@ -190,20 +209,36 @@ export function Analytics() {
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/10">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <tr key={i} className="group hover:bg-surface-container-high/50 transition-all">
-                  <td className="py-4 text-xs font-mono text-on-surface">MSN-2026-00{i}</td>
-                  <td className="py-4 text-xs text-on-surface-variant">Mar 2{i}, 2026</td>
-                  <td className="py-4 text-xs text-on-surface-variant">Sector {i}-B</td>
-                  <td className="py-4 text-xs text-on-surface">{i * 3}</td>
-                  <td className="py-4">
-                    <span className="px-2 py-0.5 bg-secondary/10 text-secondary text-[8px] font-bold rounded uppercase">Completed</span>
-                  </td>
-                  <td className="py-4 text-right">
-                    <button className="text-[9px] font-bold text-primary uppercase tracking-widest hover:underline">View Details</button>
-                  </td>
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-xs font-mono text-on-surface-variant uppercase animate-pulse">Retrieving Tactical Archives...</td>
                 </tr>
-              ))}
+              ) : missions.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-xs font-mono text-on-surface-variant uppercase">No mission records found.</td>
+                </tr>
+              ) : (
+                missions.map((mission) => (
+                  <tr key={mission._id} className="group hover:bg-surface-container-high/50 transition-all">
+                    <td className="py-4 text-xs font-mono text-on-surface uppercase">{mission.missionId}</td>
+                    <td className="py-4 text-xs text-on-surface-variant">{new Date(mission.date).toLocaleDateString()}</td>
+                    <td className="py-4 text-xs text-on-surface-variant">{mission.location}</td>
+                    <td className="py-4 text-xs text-on-surface">{mission.victims}</td>
+                    <td className="py-4">
+                      <span className={`px-2 py-0.5 text-[8px] font-bold rounded uppercase ${
+                        mission.status === 'Completed' ? 'bg-secondary/10 text-secondary' :
+                        mission.status === 'In Progress' ? 'bg-primary/10 text-primary animate-pulse' :
+                        'bg-error/10 text-error'
+                      }`}>
+                        {mission.status}
+                      </span>
+                    </td>
+                    <td className="py-4 text-right">
+                      <button className="text-[9px] font-bold text-primary uppercase tracking-widest hover:underline">View Details</button>
+                    </td>
+                  </tr>
+                ))
+              )}
             </tbody>
           </table>
         </div>
@@ -211,3 +246,4 @@ export function Analytics() {
     </div>
   );
 }
+

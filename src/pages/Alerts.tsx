@@ -3,23 +3,37 @@ import { Card } from '../components/ui/Card';
 import { AlertTriangle, Bell, Clock, Filter, Search, ShieldAlert, Info, CheckCircle2 } from 'lucide-react';
 import { motion } from 'motion/react';
 
-const ALERTS = [
-  { id: 1, type: 'critical', title: 'Flash Flood Warning', location: 'Sector 7-B', time: '14:22:01', description: 'Water levels exceeding 1.2m. Immediate evacuation of low-lying areas required.', status: 'active' },
-  { id: 2, type: 'warning', title: 'High Wind Advisory', location: 'Zone Gamma', time: '14:15:30', description: 'Wind gusts up to 45 knots detected. Drone flight stability may be compromised.', status: 'active' },
-  { id: 3, type: 'info', title: 'Path Recalculation', location: 'Drone-01', time: '14:10:12', description: 'Autonomous path update to avoid storm cell Alpha-9.', status: 'resolved' },
-  { id: 4, type: 'critical', title: 'Victim Detected', location: 'Sector 4-C', time: '13:55:44', description: 'Thermal signature confirmed. Potential victim trapped in debris.', status: 'active' },
-  { id: 5, type: 'warning', title: 'Battery Low', location: 'Drone-02', time: '13:45:20', description: 'Battery level at 15%. Returning to base for swap.', status: 'resolved' },
-];
-
 export function Alerts() {
+  const [alerts, setAlerts] = useState<any[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [loading, setLoading] = useState(true);
 
-  const filteredAlerts = ALERTS.filter(alert => 
+  React.useEffect(() => {
+    fetch('/api/alerts')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setAlerts(data);
+        } else {
+          console.error('API did not return an array:', data);
+          setAlerts([]);
+        }
+        setLoading(false);
+      })
+      .catch(err => {
+        console.error('Error fetching alerts:', err);
+        setAlerts([]);
+        setLoading(false);
+      });
+  }, []);
+
+
+  const filteredAlerts = alerts.filter(alert => 
     alert.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    alert.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    alert.type.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    alert.location.toLowerCase().includes(searchQuery.toLowerCase())
+    alert.message?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    alert.type.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
 
   return (
     <div className="space-y-6">
@@ -85,59 +99,69 @@ export function Alerts() {
 
         {/* Alert List */}
         <div className="col-span-12 lg:col-span-9 space-y-4">
-          {filteredAlerts.map((alert, idx) => (
-            <motion.div
-              key={alert.id}
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ delay: idx * 0.1 }}
-              className={`glass-panel p-5 rounded-2xl border-l-4 flex items-start gap-5 group hover:bg-surface-container-high transition-all ${
-                alert.type === 'critical' ? 'border-l-error' : 
-                alert.type === 'warning' ? 'border-l-tertiary' : 
-                'border-l-primary'
-              }`}
-            >
-              <div className={`p-3 rounded-xl ${
-                alert.type === 'critical' ? 'bg-error/10 text-error' : 
-                alert.type === 'warning' ? 'bg-tertiary/10 text-tertiary' : 
-                'bg-primary/10 text-primary'
-              }`}>
-                {alert.type === 'critical' ? <ShieldAlert className="w-6 h-6" /> : 
-                 alert.type === 'warning' ? <AlertTriangle className="w-6 h-6" /> : 
-                 <Bell className="w-6 h-6" />}
-              </div>
-              
-              <div className="flex-1">
-                <div className="flex justify-between items-start mb-2">
-                  <div>
-                    <h3 className="text-sm font-headline font-bold text-on-surface uppercase tracking-wider">{alert.title}</h3>
-                    <div className="flex items-center gap-3 mt-1">
-                      <span className="text-[10px] font-mono text-on-surface-variant flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> {alert.time}
-                      </span>
-                      <span className="text-[10px] font-mono text-on-surface-variant flex items-center gap-1">
-                        <AlertTriangle className="w-3 h-3" /> {alert.location}
+          {loading ? (
+            <div className="flex justify-center py-12 text-on-surface-variant font-mono uppercase tracking-widest text-xs animate-pulse">
+              Syncing with Central Command...
+            </div>
+          ) : filteredAlerts.length === 0 ? (
+            <div className="flex justify-center py-12 text-on-surface-variant font-mono uppercase tracking-widest text-xs">
+              No active threats detected.
+            </div>
+          ) : (
+            filteredAlerts.map((alert, idx) => (
+              <motion.div
+                key={alert._id || alert.id}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.1 }}
+                className={`glass-panel p-5 rounded-2xl border-l-4 flex items-start gap-5 group hover:bg-surface-container-high transition-all ${
+                  alert.type === 'critical' ? 'border-l-error' : 
+                  alert.type === 'warning' ? 'border-l-tertiary' : 
+                  'border-l-primary'
+                }`}
+              >
+                <div className={`p-3 rounded-xl ${
+                  alert.type === 'critical' ? 'bg-error/10 text-error' : 
+                  alert.type === 'warning' ? 'bg-tertiary/10 text-tertiary' : 
+                  'bg-primary/10 text-primary'
+                }`}>
+                  {alert.type === 'critical' ? <ShieldAlert className="w-6 h-6" /> : 
+                   alert.type === 'warning' ? <AlertTriangle className="w-6 h-6" /> : 
+                   <Bell className="w-6 h-6" />}
+                </div>
+                
+                <div className="flex-1">
+                  <div className="flex justify-between items-start mb-2">
+                    <div>
+                      <h3 className="text-sm font-headline font-bold text-on-surface uppercase tracking-wider">{alert.title}</h3>
+                      <div className="flex items-center gap-3 mt-1">
+                        <span className="text-[10px] font-mono text-on-surface-variant flex items-center gap-1">
+                          <Clock className="w-3 h-3" /> {alert.timestamp ? new Date(alert.timestamp).toLocaleTimeString() : alert.time}
+                        </span>
+                        {alert.location && (
+                          <span className="text-[10px] font-mono text-on-surface-variant flex items-center gap-1">
+                            <AlertTriangle className="w-3 h-3" /> {alert.location}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest ${
+                        alert.status === 'active' ? 'bg-error text-on-error animate-pulse' : 'bg-secondary/20 text-secondary'
+                      }`}>
+                        {alert.status}
                       </span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <span className={`px-2 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest ${
-                      alert.status === 'active' ? 'bg-error text-on-error animate-pulse' : 'bg-secondary/20 text-secondary'
-                    }`}>
-                      {alert.status}
-                    </span>
-                    <button className="p-1.5 hover:bg-surface-container-highest rounded-lg transition-colors text-on-surface-variant">
-                      <CheckCircle2 className="w-4 h-4" />
-                    </button>
-                  </div>
+                  <p className="text-xs text-on-surface-variant leading-relaxed max-w-2xl">
+                    {alert.message || alert.description}
+                  </p>
                 </div>
-                <p className="text-xs text-on-surface-variant leading-relaxed max-w-2xl">
-                  {alert.description}
-                </p>
-              </div>
-            </motion.div>
-          ))}
+              </motion.div>
+            ))
+          )}
         </div>
+
       </div>
     </div>
   );

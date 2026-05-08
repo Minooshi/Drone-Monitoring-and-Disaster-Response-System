@@ -1,25 +1,56 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card } from '../components/ui/Card';
 import { 
   AlertTriangle, 
   Plane, 
-  Thermometer
+  Thermometer,
+  LogOut
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { clsx } from 'clsx';
 import { useDrone } from '../lib/DroneContext';
+import { useNavigate } from 'react-router-dom';
 
 export function Dashboard() {
+  const navigate = useNavigate();
   const { status, toggleStatus } = useDrone();
+  const [alertCount, setAlertCount] = useState<number>(0);
   const isInFlight = status === 'In Flight';
+
+  useEffect(() => {
+    fetch('/api/alerts')
+      .then(res => res.json())
+      .then(data => {
+        if (Array.isArray(data)) {
+          setAlertCount(data.length);
+        }
+      })
+      .catch(err => console.error('Error fetching alerts:', err));
+  }, []);
 
   return (
     <div className="space-y-6">
+      <div className="flex justify-between items-center mb-4">
+        <div>
+          <h2 className="text-2xl font-headline font-bold text-on-surface uppercase tracking-widest">Tactical Command</h2>
+          <p className="text-[10px] font-headline font-bold text-primary tracking-[0.3em] uppercase mt-1">Operational Overview</p>
+        </div>
+        <button 
+          onClick={() => navigate('/login')}
+          className="flex items-center gap-2 px-4 py-2 bg-error/10 hover:bg-error/20 text-error border border-error/20 rounded-xl text-[10px] font-bold uppercase tracking-widest transition-all shadow-lg shadow-error/5 group"
+        >
+          <LogOut className="w-3.5 h-3.5 group-hover:-translate-x-1 transition-transform" />
+          Terminate Session
+        </button>
+      </div>
+
       {/* Top Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl">
         <Card title="Active Alerts" icon={AlertTriangle}>
           <div className="flex items-baseline gap-2 mt-2">
-            <span className="text-4xl font-headline font-bold text-tertiary">07</span>
+            <span className="text-4xl font-headline font-bold text-tertiary">
+              {alertCount.toString().padStart(2, '0')}
+            </span>
             <AlertTriangle className="w-5 h-5 text-tertiary animate-pulse" />
           </div>
         </Card>
@@ -66,7 +97,6 @@ export function Dashboard() {
                 )}
                 animate={{ x: isInFlight ? 4 : '100%' }}
                 transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                style={{ x: isInFlight ? 4 : 'calc(100% - 4px)' }} // fallback if animate fails
               />
               
               {/* Hover highlight line */}
@@ -163,3 +193,5 @@ export function Dashboard() {
     </div>
   );
 }
+
+

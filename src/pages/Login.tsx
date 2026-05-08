@@ -1,18 +1,48 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { motion } from 'motion/react';
 import { Rocket, Shield, Lock, User, ArrowRight, AlertCircle, HelpCircle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export function Login() {
   const navigate = useNavigate();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await res.json();
+
+      if (data.success) {
+        // In a real app, you'd store a token. For now, we'll just navigate.
+        navigate('/');
+      } else {
+        setError(data.message || 'Authentication failed');
+      }
+    } catch (err) {
+      setError('Connection to Aegis Command failed');
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background flex flex-col items-center justify-center p-6 relative overflow-hidden">
       {/* Background Simulation */}
       <div className="absolute inset-0 z-0">
-        <img 
-          src="https://picsum.photos/seed/command/1920/1080?blur=10" 
-          alt="Background" 
+        <img
+          src="https://picsum.photos/seed/command/1920/1080?blur=10"
+          alt="Background"
           className="w-full h-full object-cover opacity-20 grayscale"
           referrerPolicy="no-referrer"
         />
@@ -28,7 +58,7 @@ export function Login() {
       </div>
 
       {/* Login Card */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         className="w-full max-w-md glass-panel p-10 rounded-3xl border border-outline-variant/20 relative z-10 shadow-2xl"
@@ -37,18 +67,21 @@ export function Login() {
           <div className="w-16 h-16 bg-primary/10 rounded-2xl flex items-center justify-center text-primary mb-6 border border-primary/20 shadow-lg shadow-primary/10">
             <Rocket className="w-8 h-8" />
           </div>
-          <h1 className="text-2xl font-headline font-bold tracking-widest text-on-surface uppercase">AEGIS COMMAND</h1>
+          <h1 className="text-2xl font-headline font-bold tracking-widest text-on-surface uppercase">Drone Monitoring system</h1>
           <p className="text-[10px] font-headline font-bold text-primary tracking-[0.3em] uppercase mt-2">Tactical Medical Response</p>
         </div>
 
-        <form className="space-y-6" onSubmit={(e) => { e.preventDefault(); navigate('/'); }}>
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <div className="space-y-2">
-            <label className="text-[10px] font-headline font-bold text-on-surface-variant uppercase tracking-widest ml-1">Officer ID / Username</label>
+            <label className="text-[10px] font-headline font-bold text-on-surface-variant uppercase tracking-widest ml-1">Officer ID / Email</label>
             <div className="relative">
               <User className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
-              <input 
-                type="text" 
-                placeholder="Enter credentials"
+              <input
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="Enter email address"
+                required
                 className="w-full bg-surface-container-low border border-outline-variant/20 rounded-xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-primary/50 transition-all"
               />
             </div>
@@ -61,39 +94,44 @@ export function Login() {
             </div>
             <div className="relative">
               <Lock className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-on-surface-variant" />
-              <input 
-                type="password" 
+              <input
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••••••"
+                required
                 className="w-full bg-surface-container-low border border-outline-variant/20 rounded-xl py-3 pl-12 pr-4 text-sm focus:outline-none focus:border-primary/50 transition-all"
               />
             </div>
           </div>
+
+          {error && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="flex items-center gap-2 p-3 bg-error/10 border border-error/20 rounded-xl text-error text-[10px] font-bold uppercase tracking-wider"
+            >
+              <AlertCircle className="w-4 h-4" />
+              {error}
+            </motion.div>
+          )}
 
           <div className="flex items-center gap-3 px-1">
             <input type="checkbox" className="w-4 h-4 rounded border-outline-variant/30 bg-surface-container-low text-primary focus:ring-primary/20" id="persist" />
             <label htmlFor="persist" className="text-[10px] text-on-surface-variant font-medium">Maintain persistent session</label>
           </div>
 
-          <button 
+          <button
             type="submit"
-            className="w-full py-4 bg-primary text-on-primary font-headline font-bold text-sm uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-primary/20"
+            disabled={loading}
+            className="w-full py-4 bg-primary text-on-primary font-headline font-bold text-sm uppercase tracking-widest rounded-xl flex items-center justify-center gap-2 hover:brightness-110 active:scale-[0.98] transition-all shadow-lg shadow-primary/20 disabled:opacity-50"
           >
-            Initialize Session
+            {loading ? 'Initializing...' : 'Initialize Session'}
             <ArrowRight className="w-4 h-4" />
           </button>
         </form>
 
-        <div className="mt-10 pt-8 border-t border-outline-variant/10 space-y-3">
-          <p className="text-center text-[9px] font-headline font-bold text-on-surface-variant uppercase tracking-widest mb-4">Protocol Overrides</p>
-          <button className="w-full py-3 border border-error/30 text-error font-headline font-bold text-[10px] uppercase tracking-widest rounded-xl hover:bg-error/5 transition-all flex items-center justify-center gap-2">
-            <AlertCircle className="w-3 h-3" />
-            Emergency Access
-          </button>
-          <button className="w-full py-3 border border-outline-variant/20 text-on-surface-variant font-headline font-bold text-[10px] uppercase tracking-widest rounded-xl hover:bg-surface-container-high transition-all flex items-center justify-center gap-2">
-            <HelpCircle className="w-3 h-3" />
-            Contact Admin
-          </button>
-        </div>
+
       </motion.div>
 
       {/* Bottom Status */}
@@ -117,3 +155,4 @@ export function Login() {
     </div>
   );
 }
+
