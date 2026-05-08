@@ -6,6 +6,7 @@ const missionSchema = new mongoose.Schema({
   location: { type: String, required: true },
   victims: { type: Number, default: 0 },
   status: { type: String, enum: ['Completed', 'In Progress', 'Aborted'], default: 'Completed' },
+  disasterType: { type: String, default: 'Search & Rescue' },
   successRate: { type: Number, default: 100 }
 });
 

@@ -30,6 +30,10 @@
   --color-outline-variant: #44484f;
   --color-on-surface: #f1f3fc;
   --color-on-surface-variant: #a8abb3;
+
+  /* Theme selection variables */
+  --color-theme-bg: #0a0e14;
+  --color-theme-surface: #0a0e14;
 }
 
 @layer base {
@@ -54,16 +58,26 @@
     --color-secondary: #008736;
     --color-secondary-container: #6ffb85;
     --color-on-secondary: #ffffff;
+
+    /* Reset theme surface in light mode if you want light cards, 
+       but user wants theme activated for both, so we keep the variables dynamic from JS */
   }
 
   body {
-    @apply bg-background text-on-surface font-sans antialiased transition-colors duration-300;
+    @apply bg-background text-on-surface font-sans antialiased transition-colors duration-500;
+  }
+
+  /* Target all inputs and text areas to use the tactical theme when active */
+  input, select, textarea {
+    @apply bg-surface-container-low border-outline-variant/30 text-on-surface focus:border-primary/50 transition-all duration-300;
+    background-color: var(--color-theme-surface);
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-surface/70 backdrop-blur-xl border border-outline-variant/10 transition-colors duration-300;
+    @apply backdrop-blur-xl border border-outline-variant/10 transition-all duration-500;
+    background-color: color-mix(in srgb, var(--color-theme-surface) 70%, transparent);
   }
   
   .hud-corner {
@@ -71,7 +85,8 @@
   }
 
   .scan-line {
-    background: linear-gradient(to bottom, transparent 50%, rgba(80, 181, 255, 0.05) 50%);
+    background: linear-gradient(to bottom, transparent 50%, rgba(var(--color-primary), 0.05) 50%);
     background-size: 100% 4px;
   }
 }
+

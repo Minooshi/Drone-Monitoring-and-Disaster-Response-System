@@ -62,6 +62,23 @@ export function Settings() {
     document.documentElement.style.setProperty('--color-primary-container', accentColor + 'cc');
   }, [accentColor]);
 
+  // Apply Theme Colors
+  useEffect(() => {
+    const themes: Record<string, { bg: string, surface: string }> = {
+      tactical: { bg: '#0a0e14', surface: '#0f172a' },
+      neon: { bg: '#000814', surface: '#001a33' },
+      military: { bg: '#0d1109', surface: '#1a1f16' }
+    };
+
+    const selected = themes[activeTheme];
+    if (selected) {
+      // Only apply these backgrounds if we are in dark mode (optional, but usually these "themes" are dark-centric)
+      // The user wants them active for both, so we'll apply them to specific variables used by cards/inputs.
+      document.documentElement.style.setProperty('--color-theme-bg', selected.bg);
+      document.documentElement.style.setProperty('--color-theme-surface', selected.surface);
+    }
+  }, [activeTheme]);
+
   const handlePasswordChange = async (e: React.FormEvent) => {
     e.preventDefault();
     if (passwordForm.new !== passwordForm.confirm) {
@@ -125,7 +142,7 @@ export function Settings() {
 
           <div className="flex flex-col md:flex-row gap-6">
             <div className="relative group/avatar">
-              <div className="w-24 h-24 rounded-2xl bg-surface-container-highest border-2 border-outline-variant flex items-center justify-center overflow-hidden relative">
+              <div className="w-24 h-24 rounded-2xl bg-surface-container-highest/20 border-2 border-outline-variant flex items-center justify-center overflow-hidden relative">
                 <User className="w-12 h-12 text-on-surface-variant group-hover/avatar:scale-110 transition-transform duration-500" />
                 <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover/avatar:opacity-100 transition-opacity flex items-center justify-center">
                   <RefreshCw className="w-6 h-6 text-white animate-spin-slow" />
@@ -163,7 +180,7 @@ export function Settings() {
               <div className="flex gap-3 pt-2">
                 <button 
                   onClick={() => setShowPasswordModal(true)}
-                  className="flex-1 flex items-center justify-center gap-2 bg-surface-container-highest hover:bg-surface-bright text-on-surface py-2 rounded-lg text-sm font-medium transition-all border border-outline-variant/30"
+                  className="flex-1 flex items-center justify-center gap-2 bg-surface-container-highest/30 hover:bg-surface-bright text-on-surface py-2 rounded-lg text-sm font-medium transition-all border border-outline-variant/30"
                 >
                   <Key className="w-4 h-4 text-primary" style={{ color: 'var(--color-primary)' }} />
                   Change Password
@@ -179,6 +196,7 @@ export function Settings() {
             </div>
           </div>
         </section>
+
 
         {/* Section 2: Drone Information */}
         <section className="glass-panel rounded-2xl p-6 relative overflow-hidden group">

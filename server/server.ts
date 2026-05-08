@@ -47,11 +47,11 @@ async function seedData() {
     if (missionCount === 0) {
       console.log('🌱 Seeding demo missions...');
       await Mission.insertMany([
-        { missionId: 'MSN-2026-001', location: 'Sector 4-B', victims: 12, status: 'Completed', successRate: 95 },
-        { missionId: 'MSN-2026-002', location: 'Coastal Zone', victims: 8, status: 'Completed', successRate: 88 },
-        { missionId: 'MSN-2026-003', location: 'Urban Center', victims: 24, status: 'In Progress', successRate: 92 },
-        { missionId: 'MSN-2026-004', location: 'Mountain Ridge', victims: 15, status: 'Completed', successRate: 90 },
-        { missionId: 'MSN-2026-005', location: 'Sector 9-F', victims: 21, status: 'Completed', successRate: 94 }
+        { missionId: 'MSN-2026-001', location: 'Sector 4-B', victims: 12, status: 'Completed', successRate: 95, disasterType: 'Forest Fire' },
+        { missionId: 'MSN-2026-002', location: 'Coastal Zone', victims: 8, status: 'Completed', successRate: 88, disasterType: 'Flood' },
+        { missionId: 'MSN-2026-003', location: 'Urban Center', victims: 24, status: 'In Progress', successRate: 92, disasterType: 'Earthquake' },
+        { missionId: 'MSN-2026-004', location: 'Mountain Ridge', victims: 15, status: 'Completed', successRate: 90, disasterType: 'Landslide' },
+        { missionId: 'MSN-2026-005', location: 'Sector 9-F', victims: 21, status: 'Completed', successRate: 94, disasterType: 'Medical' }
       ]);
     }
 
@@ -132,6 +132,27 @@ app.get('/api/missions', async (req, res) => {
     res.json(missions);
   } catch (error) {
     res.status(500).json({ message: 'Error fetching missions', error });
+  }
+});
+
+app.post('/api/missions', async (req, res) => {
+  try {
+    const newMission = new Mission(req.body);
+    await newMission.save();
+    res.status(201).json(newMission);
+  } catch (error) {
+    res.status(400).json({ message: 'Error creating mission', error });
+  }
+});
+
+app.patch('/api/missions/:id', async (req, res) => {
+  const { status } = req.body;
+  try {
+    const mission = await Mission.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    if (!mission) return res.status(404).json({ message: 'Mission not found' });
+    res.json(mission);
+  } catch (error) {
+    res.status(400).json({ message: 'Error updating mission', error });
   }
 });
 
