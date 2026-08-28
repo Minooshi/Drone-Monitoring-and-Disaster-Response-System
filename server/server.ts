@@ -181,6 +181,35 @@ app.post('/api/alerts', async (req, res) => {
   }
 });
 
+// Read-only Partner API Proxy (GET only - strictly no writes/ingest to DB)
+app.get('/api/partner/:endpoint', async (req, res) => {
+  const { endpoint } = req.params;
+  const partnerUrl = (process.env.PARTNER_FEED_URL || process.env.VITE_PARTNER_FEED_URL || 'https://srs.naveennuwantha.lk').replace(/\/+$/, '');
+  const apiKey = (req.query.api_key as string) || (req.headers['x-api-key'] as string) || process.env.PARTNER_API_KEY || process.env.VITE_PARTNER_API_KEY || 'sldm_live_oKriEyeDjoBVQWOTQyDDWZPFNuwmnaaq';
+
+  try {
+    const targetUrl = new URL(`${partnerUrl}/partner/${endpoint}`);
+    targetUrl.searchParams.set('api_key', apiKey);
+
+    const response = await fetch(targetUrl.toString(), {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/json, application/geo+json',
+        'X-API-Key': apiKey,
+      },
+    });
+
+    const contentType = response.headers.get('content-type') || 'application/json';
+    res.status(response.status);
+    res.setHeader('Content-Type', contentType);
+
+    const body = await response.text();
+    res.send(body);
+  } catch (error: any) {
+    res.status(502).json({ error: 'Failed to proxy partner request', message: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`🚀 Backend server running on http://localhost:${PORT}`);
 });

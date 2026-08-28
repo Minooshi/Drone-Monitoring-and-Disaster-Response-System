@@ -2,6 +2,7 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { 
   LayoutDashboard, 
+  Map,
   Bell, 
   BarChart3, 
   Settings
@@ -10,6 +11,7 @@ import { cn } from '../../lib/utils';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', path: '/' },
+  { icon: Map, label: 'Partner Map', path: '/partner-map' },
   { icon: Bell, label: 'Alerts', path: '/alerts' },
   { icon: BarChart3, label: 'Analytics', path: '/analytics' },
   { icon: Settings, label: 'Settings', path: '/settings' },
