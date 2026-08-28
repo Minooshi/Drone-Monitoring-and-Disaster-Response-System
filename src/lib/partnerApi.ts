@@ -1,3 +1,10 @@
+export interface DirectionalRiskInfo {
+  deviceId?: string;
+  riskLevel?: 'Normal' | 'Critical' | string;
+  confidence?: number;
+  lastUpdate?: string;
+}
+
 export interface PartnerMountain {
   id: string | number;
   name: string;
@@ -6,14 +13,20 @@ export interface PartnerMountain {
   longitude: number;
   elevation?: number;
   riskLevel: 'Normal' | 'Critical';
+  directionalRisks?: Record<string, DirectionalRiskInfo>;
+  lastUpdate?: string;
 }
 
 export interface PartnerDevice {
   id: string | number;
-  latitude: number;
-  longitude: number;
+  latitude?: number;
+  longitude?: number;
   status: 'Normal' | 'Critical';
   confidence?: number;
+  lastUpdate?: string;
+  battery?: number;
+  nodeStatus?: string;
+  mountainName?: string;
 }
 
 export interface PartnerMapData {
@@ -62,18 +75,17 @@ function isValidCoord(lat: unknown, lng: unknown): boolean {
 function parseGeoJSON(data: any): PartnerMapData {
   const mountains: PartnerMountain[] = [];
   const devices: PartnerDevice[] = [];
+  const seenDeviceIds = new Set<string>();
 
   const features = Array.isArray(data?.features) ? data.features : [];
 
   for (const feature of features) {
     const coords = feature?.geometry?.coordinates;
-    if (!Array.isArray(coords) || coords.length < 2) continue;
+    const hasValidCoords = Array.isArray(coords) && coords.length >= 2;
 
-    // GeoJSON standard: [longitude, latitude]
-    const lng = Number(coords[0]);
-    const lat = Number(coords[1]);
-
-    if (!isValidCoord(lat, lng)) continue;
+    const lng = hasValidCoords ? Number(coords[0]) : 0;
+    const lat = hasValidCoords ? Number(coords[1]) : 0;
+    const coordsValid = isValidCoord(lat, lng);
 
     const props = feature.properties || {};
     const itemType = (props.type || '').toLowerCase();
@@ -81,24 +93,61 @@ function parseGeoJSON(data: any): PartnerMapData {
     const isCritical = String(rawRisk).toLowerCase().includes('crit') || String(rawRisk).toLowerCase() === 'critical';
     const normalizedRisk: 'Normal' | 'Critical' = isCritical ? 'Critical' : 'Normal';
 
-    if (itemType === 'mountain' || props.name || props.elevation) {
-      mountains.push({
-        id: props.id ?? props._id ?? props.name ?? `m-${lat}-${lng}`,
-        name: props.name || 'Unnamed Mountain',
-        district: props.district,
-        latitude: lat,
-        longitude: lng,
-        elevation: props.elevation ? Number(props.elevation) : undefined,
-        riskLevel: normalizedRisk,
-      });
+    if (itemType === 'mountain' || props.name || props.elevation !== undefined) {
+      if (coordsValid) {
+        const directionalRisks: Record<string, DirectionalRiskInfo> = {};
+        if (props.directional_risks && typeof props.directional_risks === 'object') {
+          for (const [dir, info] of Object.entries<any>(props.directional_risks)) {
+            const dirCrit = String(info.risk_level || '').toLowerCase().includes('crit') ? 'Critical' : 'Normal';
+            directionalRisks[dir] = {
+              deviceId: info.device_id,
+              riskLevel: dirCrit,
+              confidence: info.confidence !== undefined ? Number(info.confidence) : undefined,
+              lastUpdate: info.last_update,
+            };
+
+            // If device id is present, record it as a monitored sensor
+            if (info.device_id && !seenDeviceIds.has(info.device_id)) {
+              seenDeviceIds.add(info.device_id);
+              devices.push({
+                id: info.device_id,
+                latitude: lat,
+                longitude: lng,
+                status: dirCrit,
+                confidence: info.confidence !== undefined ? Number(info.confidence) : undefined,
+                lastUpdate: info.last_update,
+                mountainName: props.name || 'SRS Sector',
+              });
+            }
+          }
+        }
+
+        mountains.push({
+          id: props.id ?? props._id ?? props.name ?? `m-${lat}-${lng}`,
+          name: props.name || 'Unnamed Mountain',
+          district: props.district,
+          latitude: lat,
+          longitude: lng,
+          elevation: props.elevation !== undefined ? Number(props.elevation) : undefined,
+          riskLevel: normalizedRisk,
+          directionalRisks: Object.keys(directionalRisks).length > 0 ? directionalRisks : undefined,
+          lastUpdate: props.last_update || data?.metadata?.generated_at,
+        });
+      }
     } else {
-      devices.push({
-        id: props.id ?? props.deviceId ?? props._id ?? `d-${lat}-${lng}`,
-        latitude: lat,
-        longitude: lng,
-        status: normalizedRisk,
-        confidence: props.confidence !== undefined ? Number(props.confidence) : undefined,
-      });
+      const devId = String(props.id ?? props.deviceId ?? props._id ?? `d-${lat}-${lng}`);
+      if (!seenDeviceIds.has(devId)) {
+        seenDeviceIds.add(devId);
+        devices.push({
+          id: devId,
+          latitude: coordsValid ? lat : undefined,
+          longitude: coordsValid ? lng : undefined,
+          status: normalizedRisk,
+          confidence: props.confidence !== undefined ? Number(props.confidence) : undefined,
+          lastUpdate: props.last_update,
+          nodeStatus: props.node_status,
+        });
+      }
     }
   }
 
@@ -113,6 +162,7 @@ function parseGeoJSON(data: any): PartnerMapData {
 function parseJSON(data: any): PartnerMapData {
   const mountains: PartnerMountain[] = [];
   const devices: PartnerDevice[] = [];
+  const seenDeviceIds = new Set<string>();
 
   const rawMountains = Array.isArray(data?.mountains) ? data.mountains : [];
   for (const m of rawMountains) {
@@ -129,8 +179,9 @@ function parseJSON(data: any): PartnerMapData {
       district: m.district,
       latitude: lat,
       longitude: lng,
-      elevation: m.elevation ? Number(m.elevation) : undefined,
+      elevation: m.elevation !== undefined ? Number(m.elevation) : undefined,
       riskLevel: isCritical ? 'Critical' : 'Normal',
+      lastUpdate: m.last_update || data?.generated_at,
     });
   }
 
@@ -138,18 +189,25 @@ function parseJSON(data: any): PartnerMapData {
   for (const d of rawDevices) {
     const lat = Number(d.latitude ?? d.lat);
     const lng = Number(d.longitude ?? d.lng ?? d.lon);
-    if (!isValidCoord(lat, lng)) continue;
+    const hasValid = isValidCoord(lat, lng);
 
     const rawStatus = d.status ?? d.risk_level ?? 'Normal';
     const isCritical = String(rawStatus).toLowerCase().includes('crit') || String(rawStatus).toLowerCase() === 'critical';
+    const devId = String(d.id ?? d.deviceId ?? d._id ?? `d-${lat}-${lng}`);
 
-    devices.push({
-      id: d.id ?? d.deviceId ?? d._id ?? `d-${lat}-${lng}`,
-      latitude: lat,
-      longitude: lng,
-      status: isCritical ? 'Critical' : 'Normal',
-      confidence: d.confidence !== undefined ? Number(d.confidence) : undefined,
-    });
+    if (!seenDeviceIds.has(devId)) {
+      seenDeviceIds.add(devId);
+      devices.push({
+        id: devId,
+        latitude: hasValid ? lat : undefined,
+        longitude: hasValid ? lng : undefined,
+        status: isCritical ? 'Critical' : 'Normal',
+        confidence: d.confidence !== undefined ? Number(d.confidence) : undefined,
+        lastUpdate: d.last_update,
+        battery: d.battery !== null && d.battery !== undefined ? Number(d.battery) : undefined,
+        nodeStatus: d.node_status,
+      });
+    }
   }
 
   return {
