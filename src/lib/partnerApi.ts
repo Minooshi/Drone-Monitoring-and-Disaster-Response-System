@@ -31,9 +31,8 @@ export interface FetchResult {
   errorMessage: string | null;
 }
 
-// Configuration resolution
+// Configuration resolution from .env
 const DEFAULT_URL = 'https://srs.naveennuwantha.lk';
-const DEFAULT_KEY = 'sldm_live_oKriEyeDjoBVQWOTQyDDWZPFNuwmnaaq';
 
 export function getPartnerConfig() {
   const env = (import.meta as any).env || {};
@@ -43,10 +42,11 @@ export function getPartnerConfig() {
     DEFAULT_URL
   ).replace(/\/+$/, '');
 
-  const apiKey =
+  const apiKey = (
     env.VITE_PARTNER_API_KEY ||
     env.NEXT_PUBLIC_PARTNER_API_KEY ||
-    DEFAULT_KEY;
+    ''
+  ).trim();
 
   return { baseUrl, apiKey };
 }
@@ -176,6 +176,14 @@ async function attemptFetch(url: string, apiKey: string, useHeaders: boolean, si
 
 export async function fetchPartnerMapData(): Promise<FetchResult> {
   const { baseUrl, apiKey } = getPartnerConfig();
+
+  if (!apiKey) {
+    return {
+      data: null,
+      status: 'error',
+      errorMessage: 'Partner API key is missing. Please set VITE_PARTNER_API_KEY in your .env file.',
+    };
+  }
 
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 8000); // 8-second timeout

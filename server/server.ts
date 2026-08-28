@@ -185,7 +185,11 @@ app.post('/api/alerts', async (req, res) => {
 app.get('/api/partner/:endpoint', async (req, res) => {
   const { endpoint } = req.params;
   const partnerUrl = (process.env.PARTNER_FEED_URL || process.env.VITE_PARTNER_FEED_URL || 'https://srs.naveennuwantha.lk').replace(/\/+$/, '');
-  const apiKey = (req.query.api_key as string) || (req.headers['x-api-key'] as string) || process.env.PARTNER_API_KEY || process.env.VITE_PARTNER_API_KEY || 'sldm_live_oKriEyeDjoBVQWOTQyDDWZPFNuwmnaaq';
+  const apiKey = (req.query.api_key as string) || (req.headers['x-api-key'] as string) || process.env.VITE_PARTNER_API_KEY || process.env.NEXT_PUBLIC_PARTNER_API_KEY || process.env.PARTNER_API_KEY || '';
+
+  if (!apiKey) {
+    return res.status(401).json({ error: 'Missing Partner API key in environment configuration (.env)' });
+  }
 
   try {
     const targetUrl = new URL(`${partnerUrl}/partner/${endpoint}`);
