@@ -11,6 +11,8 @@ import { clsx } from 'clsx';
 import { useDrone } from '../lib/DroneContext';
 import { useNavigate } from 'react-router-dom';
 
+import { fetchPartnerMapData } from '../lib/partnerApi';
+
 export function Dashboard() {
   const navigate = useNavigate();
   const { status, toggleStatus } = useDrone();
@@ -18,14 +20,14 @@ export function Dashboard() {
   const isInFlight = status === 'In Flight';
 
   useEffect(() => {
-    fetch('/api/alerts')
-      .then(res => res.json())
-      .then(data => {
-        if (Array.isArray(data)) {
-          setAlertCount(data.length);
+    fetchPartnerMapData()
+      .then(res => {
+        if (res.data) {
+          const total = (res.data.mountains?.length || 0) + (res.data.devices?.length || 0);
+          setAlertCount(total);
         }
       })
-      .catch(err => console.error('Error fetching alerts:', err));
+      .catch(err => console.error('Error fetching partner alerts:', err));
   }, []);
 
   return (

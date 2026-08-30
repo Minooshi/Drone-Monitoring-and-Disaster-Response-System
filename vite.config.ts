@@ -21,8 +21,14 @@ export default defineConfig(({mode}) => {
       hmr: process.env.DISABLE_HMR !== 'true',
       proxy: {
         '/api': {
-          target: 'http://localhost:5000',
+          target: `http://localhost:${env.PORT || 5001}`,
           changeOrigin: true,
+        },
+        '/partner-proxy': {
+          target: env.VITE_PARTNER_FEED_URL || env.NEXT_PUBLIC_PARTNER_FEED_URL || 'https://srs.naveennuwantha.lk',
+          changeOrigin: true,
+          rewrite: (path) => path.replace(/^\/partner-proxy/, ''),
+          secure: false,
         },
       },
     },
