@@ -3,8 +3,13 @@ import { Card } from '../components/ui/Card';
 import { 
   AlertTriangle, 
   Plane, 
-  Thermometer,
-  LogOut
+  Thermometer, 
+  LogOut,
+  ScanFace,
+  ArrowUpRight,
+  Crosshair,
+  Sparkles,
+  Activity
 } from 'lucide-react';
 import { motion } from 'motion/react';
 import { clsx } from 'clsx';
@@ -108,86 +113,148 @@ export function Dashboard() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* RGB Camera Feed */}
-        <Card title="RGB Live Stream" icon={Plane} subtitle="Drone-01_Alpha" className="p-0 overflow-hidden border-primary/20">
-          <div className="relative aspect-video bg-black group">
-            <img 
-              src="https://images.unsplash.com/photo-1508614589041-895b88991e3e?auto=format&fit=crop&q=80&w=1200" 
-              alt="RGB Feed"
-              className="w-full h-full object-cover opacity-80 group-hover:opacity-100 transition-opacity"
-            />
-            <div className="absolute inset-0 scan-line pointer-events-none"></div>
-            
-            {/* OSD (On-Screen Display) */}
-            <div className="absolute top-4 left-4 flex flex-col gap-1">
-              <div className="flex items-center gap-2 bg-black/60 px-2 py-1 rounded border border-white/10">
-                <div className="w-2 h-2 rounded-full bg-error animate-pulse"></div>
-                <span className="text-[10px] font-mono font-bold uppercase tracking-wider">REC ●</span>
+      {/* Clickable Thermal Human Detection Screen Monitor */}
+      <div 
+        onClick={() => window.open('http://192.168.8.200', '_blank', 'noopener,noreferrer')}
+        className="cursor-pointer group relative block focus:outline-none"
+        role="button"
+        tabIndex={0}
+        onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') window.open('http://192.168.8.200', '_blank', 'noopener,noreferrer'); }}
+      >
+        <Card 
+          title="Thermal Human Detection" 
+          icon={ScanFace} 
+          subtitle="FLIR Boson 640 LWIR • IP: 192.168.8.200 • Click to Open Stream" 
+          className="p-0 overflow-hidden border-primary/30 group-hover:border-primary transition-all duration-500 shadow-xl group-hover:shadow-[0_0_30px_rgba(80,181,255,0.2)] relative"
+        >
+          {/* Top Live Banner Bar */}
+          <div className="px-5 py-3 bg-surface-container-low/90 backdrop-blur-md border-b border-outline-variant/20 flex flex-wrap justify-between items-center gap-3">
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-2 px-2.5 py-1 rounded bg-black/60 border border-white/10 text-xs font-mono">
+                <div className="w-2.5 h-2.5 rounded-full bg-error animate-pulse"></div>
+                <span className="font-bold uppercase tracking-wider text-white">IR LIVE FEED</span>
               </div>
-              <div className="bg-black/60 px-2 py-1 rounded border border-white/10 text-[9px] font-mono">
-                ALT: 45.2m | SPD: 12.4m/s
+              <span className="px-2 py-0.5 rounded bg-tertiary/10 text-tertiary border border-tertiary/30 text-[10px] font-mono font-bold uppercase tracking-wider">
+                ● 192.168.8.200
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2 text-xs font-mono">
+              <span className="text-primary font-bold hidden sm:inline">AI MODEL: YOLO-IR v4.2</span>
+              <div className="flex items-center gap-1.5 px-3 py-1 bg-primary/20 group-hover:bg-primary text-primary group-hover:text-black font-headline font-bold rounded-lg text-xs tracking-wider uppercase transition-all duration-300 shadow-md">
+                <span>Open Thermal Feed</span>
+                <ArrowUpRight className="w-4 h-4 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+              </div>
+            </div>
+          </div>
+
+          {/* Interactive Screen Viewport */}
+          <div className="relative aspect-[21/9] sm:aspect-[21/8] bg-black overflow-hidden select-none">
+            {/* Base Thermal Image */}
+            <img 
+              src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=1600" 
+              alt="Thermal Human Detection Feed"
+              className="w-full h-full object-cover grayscale brightness-125 contrast-150 mix-blend-screen opacity-75 group-hover:opacity-95 group-hover:scale-[1.01] transition-all duration-700"
+            />
+            {/* Dynamic Infrared Ironbow Gradient Overlay */}
+            <div className="absolute inset-0 bg-gradient-to-tr from-purple-950/70 via-red-950/40 to-amber-500/50 mix-blend-overlay"></div>
+            <div className="absolute inset-0 scan-line pointer-events-none opacity-40"></div>
+
+            {/* Corner HUD Brackets */}
+            <div className="absolute top-4 left-4 w-6 h-6 border-t-2 border-l-2 border-primary group-hover:scale-110 transition-transform"></div>
+            <div className="absolute top-4 right-4 w-6 h-6 border-t-2 border-r-2 border-primary group-hover:scale-110 transition-transform"></div>
+            <div className="absolute bottom-4 left-4 w-6 h-6 border-b-2 border-l-2 border-primary group-hover:scale-110 transition-transform"></div>
+            <div className="absolute bottom-4 right-4 w-6 h-6 border-b-2 border-r-2 border-primary group-hover:scale-110 transition-transform"></div>
+
+            {/* Simulated Reticle & Horizon HUD Overlay */}
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+              <div className="w-40 h-40 border border-white/10 rounded-full flex items-center justify-center group-hover:border-primary/40 transition-colors">
+                <div className="w-16 h-0.5 bg-primary/30 relative">
+                  <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 border border-primary rounded-full group-hover:scale-125 transition-transform"></div>
+                </div>
               </div>
             </div>
 
-            <div className="absolute top-4 right-4 bg-black/60 px-2 py-1 rounded border border-white/10 text-[9px] font-mono">
-              LAT: 7.8731° N<br/>
-              LON: 80.7718° E
+            {/* Simulated Live Detection Boxes */}
+            {/* Target 1 */}
+            <div className="absolute top-[30%] left-[25%] w-[12%] h-[40%] border-2 border-tertiary bg-tertiary/10 rounded-sm shadow-[0_0_12px_rgba(255,113,98,0.4)] flex flex-col justify-between p-1">
+              <div className="bg-tertiary text-black text-[8px] font-mono font-bold px-1 rounded-sm w-max -mt-5 whitespace-nowrap">
+                HUM-01 | 34.2°C (98%)
+              </div>
+              <div className="text-[7px] font-mono text-tertiary bg-black/80 px-1 rounded w-max">
+                HYPOTHERMIA
+              </div>
             </div>
 
-            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex items-center gap-8">
-               {/* HUD Elements */}
-               <div className="w-32 h-1 bg-white/20 relative">
-                 <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-1 h-4 bg-primary shadow-[0_0_8px_#50b5ff]"></div>
-               </div>
+            {/* Target 2 */}
+            <div className="absolute top-[38%] left-[58%] w-[10%] h-[35%] border-2 border-secondary bg-secondary/10 rounded-sm shadow-[0_0_12px_rgba(111,251,133,0.4)] flex flex-col justify-between p-1">
+              <div className="bg-black/90 border border-secondary text-secondary text-[8px] font-mono font-bold px-1 rounded-sm w-max -mt-5 whitespace-nowrap">
+                HUM-02 | 36.8°C (94%)
+              </div>
+              <div className="text-[7px] font-mono text-secondary bg-black/80 px-1 rounded w-max">
+                STABLE
+              </div>
             </div>
 
-            <div className="absolute inset-0 border-[20px] border-transparent border-t-white/5 border-b-white/5 pointer-events-none"></div>
+            {/* Target 3 */}
+            <div className="absolute top-[28%] left-[75%] w-[11%] h-[38%] border-2 border-primary bg-primary/10 rounded-sm shadow-[0_0_12px_rgba(80,181,255,0.4)] flex flex-col justify-between p-1">
+              <div className="bg-black/90 border border-primary text-primary text-[8px] font-mono font-bold px-1 rounded-sm w-max -mt-5 whitespace-nowrap">
+                HUM-03 | 38.6°C (98%)
+              </div>
+              <div className="text-[7px] font-mono text-primary bg-black/80 px-1 rounded w-max">
+                ELEVATED
+              </div>
+            </div>
+
+            {/* Telemetry OSD Bottom-Left */}
+            <div className="absolute bottom-4 left-6 flex flex-col gap-1 bg-black/70 backdrop-blur-md px-3 py-2 rounded-xl border border-white/10 text-[9px] font-mono">
+              <div className="text-white font-bold flex items-center gap-1.5">
+                <Crosshair className="w-3.5 h-3.5 text-primary" />
+                <span>FLIR LWIR SENSOR ACTIVE (192.168.8.200)</span>
+              </div>
+              <div className="text-on-surface-variant">
+                LAT: 7.8742° N | LON: 80.7731° E | ALT: 48.6m
+              </div>
+            </div>
+
+            {/* Thermal Palette Scale Right */}
+            <div className="absolute right-5 top-1/2 -translate-y-1/2 flex items-center gap-1.5 bg-black/75 backdrop-blur-md p-1.5 rounded-lg border border-white/10">
+              <div className="w-2.5 h-24 bg-gradient-to-t from-blue-600 via-yellow-400 to-red-600 rounded-full"></div>
+              <div className="flex flex-col justify-between text-[7px] font-mono text-white h-24 font-bold">
+                <span>50°</span>
+                <span>37°</span>
+                <span>15°</span>
+              </div>
+            </div>
+
+            {/* Hover Action Center Callout Overlay */}
+            <div className="absolute inset-0 bg-black/30 backdrop-blur-[1px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center">
+              <div className="px-5 py-3 rounded-2xl bg-surface-container/90 border border-primary/50 text-white font-headline text-sm font-bold uppercase tracking-wider flex items-center gap-3 shadow-2xl shadow-primary/20 transform group-hover:scale-105 transition-transform">
+                <ScanFace className="w-5 h-5 text-primary animate-pulse" />
+                <span>Open Thermal Feed (192.168.8.200)</span>
+                <ArrowUpRight className="w-4 h-4 text-primary" />
+              </div>
+            </div>
           </div>
-          <div className="p-4 bg-surface-container-low flex justify-between items-center">
-            <div className="flex gap-2">
-              <span className="px-2 py-1 bg-secondary/10 text-secondary text-[10px] font-bold rounded uppercase tracking-tighter border border-secondary/20">Signal: Optimal</span>
-              <span className="px-2 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded uppercase tracking-tighter border border-primary/20">4K HDR</span>
-            </div>
-            <button className="text-[10px] font-bold uppercase text-on-surface-variant hover:text-primary transition-colors">Fullscreen</button>
-          </div>
-        </Card>
 
-        {/* Thermal Camera Feed */}
-        <Card title="Thermal Analytics" icon={Thermometer} subtitle="IR-Sensor v2.4" className="p-0 overflow-hidden border-tertiary/20">
-          <div className="relative aspect-video bg-black group">
-            <img 
-              src="https://images.unsplash.com/photo-1614850523296-d8c1af93d400?auto=format&fit=crop&q=80&w=1200" 
-              alt="Thermal Feed"
-              className="w-full h-full object-cover grayscale brightness-150 contrast-125 mix-blend-screen opacity-70 group-hover:opacity-90 transition-opacity"
-            />
-            {/* Heat Overlay Effect */}
-            <div className="absolute inset-0 bg-gradient-to-tr from-purple-900/40 via-red-900/20 to-yellow-900/40 mix-blend-overlay"></div>
-            <div className="absolute inset-0 scan-line pointer-events-none opacity-50"></div>
-            
-            {/* Thermal Markers */}
-            <div className="absolute top-1/3 left-1/4 w-12 h-12 border border-tertiary/50 flex flex-col items-center justify-center">
-              <div className="text-[8px] font-mono text-tertiary bg-black/80 px-1">37.2°C</div>
-              <div className="w-1 h-1 bg-tertiary rounded-full"></div>
+          {/* Card Bottom Quick Summary Bar */}
+          <div className="p-4 bg-surface-container-low flex flex-wrap justify-between items-center gap-3">
+            <div className="flex flex-wrap items-center gap-2">
+              <span className="px-2.5 py-1 bg-secondary/10 text-secondary text-[10px] font-bold rounded-lg uppercase tracking-wider border border-secondary/20 flex items-center gap-1.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-secondary animate-ping"></span>
+                AI Multi-Target Tracker
+              </span>
+              <span className="px-2.5 py-1 bg-primary/10 text-primary text-[10px] font-bold rounded-lg uppercase tracking-wider border border-primary/20">
+                Spectrum: 8–14 µm LWIR
+              </span>
+              <span className="px-2.5 py-1 bg-tertiary/10 text-tertiary text-[10px] font-bold rounded-lg uppercase tracking-wider border border-tertiary/20">
+                Host: 192.168.8.200
+              </span>
             </div>
-
-            <div className="absolute bottom-1/4 right-1/3 w-8 h-8 border border-secondary/50 flex flex-col items-center justify-center">
-              <div className="text-[8px] font-mono text-secondary bg-black/80 px-1">24.5°C</div>
-              <div className="w-1 h-1 bg-secondary rounded-full"></div>
+            <div className="text-xs font-mono font-bold text-primary group-hover:text-white flex items-center gap-1 transition-colors">
+              <span>Open in New Tab</span>
+              <span>↗</span>
             </div>
-
-            {/* Scale */}
-            <div className="absolute right-4 top-1/2 -translate-y-1/2 w-3 h-32 bg-gradient-to-t from-blue-600 via-yellow-400 to-red-600 rounded-full border border-white/10 flex flex-col justify-between items-center py-2">
-               <span className="text-[7px] font-bold">50</span>
-               <span className="text-[7px] font-bold">0</span>
-            </div>
-          </div>
-          <div className="p-4 bg-surface-container-low flex justify-between items-center">
-            <div className="flex gap-2">
-              <span className="px-2 py-1 bg-tertiary/10 text-tertiary text-[10px] font-bold rounded uppercase tracking-tighter border border-tertiary/20">Detected: Human Signature</span>
-              <span className="px-2 py-1 bg-surface-container-highest text-on-surface-variant text-[10px] font-bold rounded uppercase tracking-tighter border border-outline-variant/20">Range: 150m</span>
-            </div>
-            <button className="text-[10px] font-bold uppercase text-on-surface-variant hover:text-tertiary transition-colors">Export Map</button>
           </div>
         </Card>
       </div>
@@ -195,5 +262,3 @@ export function Dashboard() {
     </div>
   );
 }
-
-
